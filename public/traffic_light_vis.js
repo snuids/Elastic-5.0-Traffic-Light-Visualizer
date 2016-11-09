@@ -1,0 +1,52 @@
+// we also need to load the controller and used by the template
+require('plugins/traffic_light_vis/traffic_light_vis_controller');
+// we need to load the css ourselves
+require('plugins/traffic_light_vis/traffic_light_vis.css');
+
+
+function TrafficLightProvider(Private) {
+	var TemplateVisType = Private(require('ui/template_vis_type/template_vis_type'));
+	var Schemas = Private(require('ui/vis/schemas'));
+
+	// return the visType object, which kibana will use to display and configure new
+	// Vis object of this type.
+	return new TemplateVisType({
+	  name: 'traffic_light',
+	  title: 'Traffic Light',
+	  description: 'Great for one-glance status readings, the traffic light visualization expresses in green / yellow / red the position of a single value in relation to low and high thresholds.',
+	  icon: 'fa-car',
+	  template: require('plugins/traffic_light_vis/traffic_light_vis.html'),
+	  params: {
+	    defaults: {
+		  max:1000000,
+	      width: 50,
+	      redThreshold: 20,
+	      greenThreshold: 80,
+	      invertScale: false,
+			numberOfLights:10
+	    },
+	    editor: require('plugins/traffic_light_vis/traffic_light_vis_params.html')
+	  },
+	  schemas: new Schemas([
+	    {
+	      group: 'metrics',
+	      name: 'metric',
+	      title: 'Metric',
+	      min: 1,
+	      defaults: [
+	        { type: 'count', schema: 'metric' }
+	      ]
+	    },
+		{
+		        group: 'buckets',
+		        name: 'split',
+		        title: 'Split Chart',
+		        min: 0,
+		        max: 1,
+		        aggFilter: '!geohash_grid'
+		      }
+	  ])
+	});
+};
+
+require('ui/registry/vis_types').register(TrafficLightProvider);
